@@ -1,0 +1,13 @@
+version: 2
+sources:
+  - name: clinical_silver
+    tables:
+      - name: raw_patients
+      - name: raw_encounters
+      - name: raw_observations
+
+models:
+  - name: dim_patients
+    columns:
+      - name: pseudonymized_patient_key
+        tests: [unique, not_null]

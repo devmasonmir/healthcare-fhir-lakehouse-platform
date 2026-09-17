@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  clinical-mock-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: clinical_lakehouse
+      POSTGRES_USER: clinical_admin
+      POSTGRES_PASSWORD: secret_password
+    ports: ["5433:5432"]
