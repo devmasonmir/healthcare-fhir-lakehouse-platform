@@ -95,7 +95,7 @@ healthcare-fhir-lakehouse-platform/
 ## ⚡ Quickstart
 
 ```bash
-git clone https://github.com/masonmirtech/healthcare-fhir-lakehouse-platform.git
+git clone https://github.com/devmasonmir/healthcare-fhir-lakehouse-platform.git
 cd healthcare-fhir-lakehouse-platform
 python -m venv venv
 .\venv\Scripts\activate
