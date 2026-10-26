@@ -5,9 +5,9 @@
 [![FHIR R4](https://img.shields.io/badge/FHIR-Release_4-orange.svg)](https://hl7.org/fhir/R4/)
 [![Snowflake](https://img.shields.io/badge/Snowflake-Lakehouse-29B5E8.svg)](https://www.snowflake.com/)
 [![dbt Core](https://img.shields.io/badge/dbt-1.7+-FF694B.svg)](https://www.getdbt.com/)
-[![HIPAA Compliant](https://img.shields.io/badge/Security-HIPAA_Safe_Harbor-green.svg)](https://www.hhs.gov/hipaa/)
+[![Privacy Demo](https://img.shields.io/badge/Security-Privacy_Demo-green.svg)](#privacy-and-security-scope)
 
-> **HIPAA-compliant enterprise clinical data platform integrating EHR datasets (Epic, Cerner, HL7, FHIR R4) into Snowflake and Delta Lake with automated PHI de-identification, clinical dimensional modeling via dbt, and Airflow orchestration.**
+> **Clinical data platform reference implementation integrating synthetic EHR datasets (Epic, Cerner, HL7, FHIR R4) into Snowflake and Delta Lake with PHI-handling patterns, clinical dimensional modeling via dbt, and Airflow orchestration.**
 
 ---
 
@@ -22,7 +22,7 @@ flowchart TD
 
     subgraph Ingestion["Ingestion & PHI De-identification"]
         Parser["FHIR R4 Resource Parser<br/>(Patient, Encounter, Observation)"]
-        Masker["HIPAA Safe Harbor De-identifier<br/>(MRN Hashing, Date Shifting, ZIP Masking)"]
+        Masker["PHI Handling Demo<br/>(Secret-keyed MRN Pseudonymization)"]
         Epic --> Parser
         Cerner --> Parser
         Parser --> Masker
@@ -49,7 +49,7 @@ flowchart TD
 
 * **FHIR R4 & HL7 Interoperability**: Standardized parsers decomposing complex nested JSON bundles into relational tables.
 * **Defensive Bundle Parsing**: Safely skips malformed entries and handles empty optional FHIR collections without aborting valid records in the same batch.
-* **Automated HIPAA Safe Harbor Compliance**: Deterministic pseudonymization, date jittering, and column-level RBAC masking for all 18 PHI identifiers.
+* **Secret-keyed MRN Pseudonymization**: Deterministic HMAC-SHA256 tokens use a runtime key instead of a salt committed to source control.
 * **Clinical Data Contracts**: Validates LOINC, SNOMED-CT, and ICD-10 clinical coding standards at ingestion time.
 * **dbt Dimensional Modeling**: Production marts for patient longitudinal views, inpatient length-of-stay, and chronic disease cohorts.
 * **Airflow Workflow Orchestration**: 30% pipeline reliability increase with automated SLA monitoring and incident alerting.
@@ -81,7 +81,7 @@ healthcare-fhir-lakehouse-platform/
 │   ├── fhir/
 │   │   └── parser.py                  # FHIR R4 bundle parser
 │   ├── governance/
-│   │   └── phi_masker.py              # HIPAA Safe Harbor de-identifier
+│   │   └── phi_masker.py              # MRN pseudonymization helper
 │   └── quality/
 │       └── data_contracts.py          # Clinical vocabulary validator
 ├── tests/
@@ -104,10 +104,25 @@ pip install -r requirements.txt
 pytest tests/ -v
 ```
 
+Set a secret of at least 32 bytes before pseudonymizing MRNs. Use a secret manager
+in deployed environments; do not commit the value:
+
+```bash
+export PHI_PSEUDONYMIZATION_KEY="replace-with-a-secret-of-at-least-32-bytes"
+```
+
 The parser treats missing or empty optional `identifier`, `coding`, `subject`, and
 `valueQuantity` elements as null fields. Non-object entries are skipped so one
 malformed resource does not prevent valid resources in the same synthetic bundle
 from being processed.
+
+## Privacy and security scope
+
+This repository is an educational reference implementation that uses synthetic
+data. MRN pseudonymization alone is not HIPAA Safe Harbor de-identification and
+does not establish regulatory compliance. A production deployment needs a formal
+risk assessment, key rotation, access controls, audit logging, retention rules,
+and handling for every identifier present in its data.
 
 ---
 

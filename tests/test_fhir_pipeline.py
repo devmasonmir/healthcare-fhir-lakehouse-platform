@@ -1,5 +1,13 @@
+import os
+from unittest.mock import patch
+
+import pytest
+
 from src.fhir.parser import FHIRParser
 from src.governance.phi_masker import PHIMasker
+
+
+TEST_KEY = "synthetic-test-key-that-is-at-least-32-bytes"
 
 
 def test_fhir_bundle_parser():
@@ -78,9 +86,41 @@ def test_parser_only_strips_a_leading_patient_reference_prefix():
     assert parsed["observations"][0]["patient_id"] == "Group/Patient/p2"
 
 
-def test_phi_masker():
-    raw_pat = {"patient_id": "p1", "mrn": "SECRET_MRN_123"}
-    masked = PHIMasker.mask_patient_record(raw_pat)
+def test_phi_masker_removes_mrn_without_mutating_source():
+    raw_patient = {"patient_id": "p1", "mrn": "SYNTHETIC_MRN_123"}
+
+    masked = PHIMasker.mask_patient_record(raw_patient, TEST_KEY)
+
+    assert raw_patient["mrn"] == "SYNTHETIC_MRN_123"
     assert "mrn" not in masked
-    assert len(masked["pseudonymized_patient_key"]) == 16
+    assert len(masked["pseudonymized_patient_key"]) == 32
     assert masked["is_deidentified"] is True
+
+
+def test_phi_masker_is_deterministic_per_key_and_separates_keys():
+    first = PHIMasker.pseudonymize_mrn("SYNTHETIC_MRN_123", TEST_KEY)
+    repeated = PHIMasker.pseudonymize_mrn("SYNTHETIC_MRN_123", TEST_KEY)
+    different_key = PHIMasker.pseudonymize_mrn(
+        "SYNTHETIC_MRN_123",
+        "different-synthetic-key-that-is-32-bytes",
+    )
+
+    assert first == repeated
+    assert first != different_key
+
+
+def test_phi_masker_reads_key_from_environment():
+    with patch.dict(os.environ, {PHIMasker.KEY_ENV_VAR: TEST_KEY}, clear=True):
+        assert PHIMasker.pseudonymize_mrn("SYNTHETIC_MRN_123")
+
+
+@pytest.mark.parametrize("key", [None, "too-short"])
+def test_phi_masker_rejects_missing_or_short_keys(key):
+    with patch.dict(os.environ, {}, clear=True):
+        with pytest.raises(ValueError):
+            PHIMasker.pseudonymize_mrn("SYNTHETIC_MRN_123", key)
+
+
+def test_phi_masker_rejects_non_string_identifiers():
+    with pytest.raises(TypeError):
+        PHIMasker.pseudonymize_mrn(12345, TEST_KEY)
