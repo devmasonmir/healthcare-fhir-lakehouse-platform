@@ -94,7 +94,7 @@ def test_phi_masker_removes_mrn_without_mutating_source():
     assert raw_patient["mrn"] == "SYNTHETIC_MRN_123"
     assert "mrn" not in masked
     assert len(masked["pseudonymized_patient_key"]) == 32
-    assert masked["is_deidentified"] is True
+    assert masked["is_mrn_pseudonymized"] is True
 
 
 def test_phi_masker_is_deterministic_per_key_and_separates_keys():
