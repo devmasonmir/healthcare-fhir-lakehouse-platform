@@ -181,7 +181,7 @@ class ClinicalDataContractTests(unittest.TestCase):
         )
 
     def test_observations_must_be_a_list(self):
-        for observations in (None, {}, ()): 
+        for observations in (None, {}, ()):
             with self.subTest(observations=observations), self.assertRaises(TypeError):
                 ClinicalDataContractValidator.validate_observations(observations)
 
