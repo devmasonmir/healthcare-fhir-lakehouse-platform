@@ -50,7 +50,7 @@ flowchart TD
 * **FHIR R4 & HL7 Interoperability**: Standardized parsers decomposing complex nested JSON bundles into relational tables.
 * **Defensive Bundle Parsing**: Safely skips malformed entries and handles empty optional FHIR collections without aborting valid records in the same batch.
 * **Secret-keyed MRN Pseudonymization**: Deterministic HMAC-SHA256 tokens use a runtime key instead of a salt committed to source control.
-* **Clinical Data Contracts**: Validates LOINC, SNOMED-CT, and ICD-10 clinical coding standards at ingestion time.
+* **Clinical Data Contracts**: Validates the supported LOINC observation codes and returns record-level diagnostics.
 * **dbt Dimensional Modeling**: Production marts for patient longitudinal views, inpatient length-of-stay, and chronic disease cohorts.
 * **Airflow Workflow Orchestration**: 30% pipeline reliability increase with automated SLA monitoring and incident alerting.
 
@@ -101,7 +101,7 @@ cd healthcare-fhir-lakehouse-platform
 python -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt
-pytest tests/ -v
+python -m unittest discover -s tests -v
 ```
 
 Set a secret of at least 32 bytes before pseudonymizing MRNs. Use a secret manager
@@ -115,6 +115,10 @@ The parser treats missing or empty optional `identifier`, `coding`, `subject`, a
 `valueQuantity` elements as null fields. Non-object entries are skipped so one
 malformed resource does not prevent valid resources in the same synthetic bundle
 from being processed.
+
+The observation data contract accepts a list of parsed observation objects. It reports
+missing or unsupported LOINC codes and malformed records by input index, while a
+non-list batch raises `TypeError` before validation starts.
 
 ## Privacy and security scope
 
