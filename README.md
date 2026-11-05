@@ -60,7 +60,7 @@ flowchart TD
 
 ```
 healthcare-fhir-lakehouse-platform/
-├── ci/ci.yml                          # CI pipeline
+├── .github/workflows/ci.yml           # GitHub Actions regression checks
 ├── dags/
 │   └── fhir_ingestion_dag.py          # Airflow clinical ingestion DAG
 ├── dbt_project/                       # dbt Core models
@@ -104,6 +104,16 @@ pip install -r requirements.txt
 python -m unittest discover -s tests -v
 ```
 
+The GitHub Actions workflow runs compilation, linting, and the dependency-free
+regression suite on Python 3.10 and 3.12 for pushes to `main` and pull requests.
+Run the same core checks locally with:
+
+```bash
+python -m compileall -q src tests
+flake8 src tests --max-line-length=120
+python -m unittest discover -s tests -v
+```
+
 Set a secret of at least 32 bytes before pseudonymizing MRNs. Use a secret manager
 in deployed environments; do not commit the value:
 
@@ -132,3 +142,4 @@ and handling for every identifier present in its data.
 
 ## 📜 License
 MIT License.
+
