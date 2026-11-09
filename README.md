@@ -7,7 +7,7 @@
 [![dbt Core](https://img.shields.io/badge/dbt-1.7+-FF694B.svg)](https://www.getdbt.com/)
 [![Privacy Demo](https://img.shields.io/badge/Security-Privacy_Demo-green.svg)](#privacy-and-security-scope)
 
-> **Clinical data platform reference implementation integrating synthetic EHR datasets (Epic, Cerner, HL7, FHIR R4) into Snowflake and Delta Lake with PHI-handling patterns, clinical dimensional modeling via dbt, and Airflow orchestration.**
+> **Clinical data platform reference implementation** demonstrating synthetic FHIR R4 parsing, clinical quality checks, privacy-aware pseudonymization examples, and Snowflake/dbt/Airflow lakehouse design patterns. The sample data is synthetic and does not connect to live Epic or Cerner systems.
 
 ---
 
@@ -52,7 +52,7 @@ flowchart TD
 * **Secret-keyed MRN Pseudonymization**: Deterministic HMAC-SHA256 tokens use a runtime key instead of a salt committed to source control.
 * **Clinical Data Contracts**: Validates the supported LOINC observation codes and returns record-level diagnostics.
 * **dbt Dimensional Modeling**: Production marts for patient longitudinal views, inpatient length-of-stay, and chronic disease cohorts.
-* **Airflow Workflow Orchestration**: 30% pipeline reliability increase with automated SLA monitoring and incident alerting.
+* **Airflow Workflow Orchestration Design**: Example clinical ingestion scheduling patterns. The 30% reliability improvement described in my resume refers to professional work, not a benchmark measured in this sample project.
 
 ---
 
@@ -140,6 +140,7 @@ and handling for every identifier present in its data.
 
 ---
 
-## 📜 License
-MIT License.
+## Scope and licensing
+
+Independent portfolio reference implementation using synthetic data, not employer systems or clinical records. No license file is currently included.
 
