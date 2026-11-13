@@ -116,6 +116,22 @@ class PHIMaskerTests(unittest.TestCase):
         self.assertEqual(len(masked["pseudonymized_patient_key"]), 32)
         self.assertIs(masked["is_mrn_pseudonymized"], True)
 
+    def test_phi_masker_reports_absent_identifiers_as_not_pseudonymized(self):
+        for patient in (
+            {"patient_id": "synthetic-missing"},
+            {"patient_id": "synthetic-null", "mrn": None},
+            {"patient_id": "synthetic-empty", "mrn": ""},
+        ):
+            with self.subTest(patient=patient):
+                original = copy.deepcopy(patient)
+
+                masked = PHIMasker.mask_patient_record(patient)
+
+                self.assertEqual(patient, original)
+                self.assertNotIn("mrn", masked)
+                self.assertEqual(masked["pseudonymized_patient_key"], "")
+                self.assertIs(masked["is_mrn_pseudonymized"], False)
+
     def test_phi_masker_is_deterministic_per_key_and_separates_keys(self):
         first = PHIMasker.pseudonymize_mrn("SYNTHETIC_MRN_123", TEST_KEY)
         repeated = PHIMasker.pseudonymize_mrn("SYNTHETIC_MRN_123", TEST_KEY)

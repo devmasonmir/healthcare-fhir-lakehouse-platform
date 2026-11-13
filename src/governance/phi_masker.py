@@ -54,6 +54,7 @@ class PHIMasker:
 
         masked = dict(patient)
         raw_mrn = masked.pop("mrn", "")
-        masked["pseudonymized_patient_key"] = cls.pseudonymize_mrn(raw_mrn, key)
-        masked["is_mrn_pseudonymized"] = True
+        pseudonymized_key = cls.pseudonymize_mrn(raw_mrn, key)
+        masked["pseudonymized_patient_key"] = pseudonymized_key
+        masked["is_mrn_pseudonymized"] = bool(pseudonymized_key)
         return masked

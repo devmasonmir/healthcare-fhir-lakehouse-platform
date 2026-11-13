@@ -121,6 +121,10 @@ in deployed environments; do not commit the value:
 export PHI_PSEUDONYMIZATION_KEY="replace-with-a-secret-of-at-least-32-bytes"
 ```
 
+Patient records with a non-empty MRN receive a pseudonymized key and set
+`is_mrn_pseudonymized` to `true`. Missing, null, or empty MRNs produce an empty
+key and set the status to `false`; they do not require the pseudonymization secret.
+
 The parser treats missing or empty optional `identifier`, `coding`, `subject`, and
 `valueQuantity` elements as null fields. Non-object entries are skipped so one
 malformed resource does not prevent valid resources in the same synthetic bundle
@@ -143,4 +147,3 @@ and handling for every identifier present in its data.
 ## Scope and licensing
 
 Independent portfolio reference implementation using synthetic data, not employer systems or clinical records. No license file is currently included.
-
