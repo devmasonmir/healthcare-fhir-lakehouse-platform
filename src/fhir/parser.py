@@ -25,10 +25,14 @@ class FHIRParser:
         return reference
 
     @staticmethod
-    def parse_bundle(bundle: Dict[str, Any]) -> Dict[str, List[Dict[str, Any]]]:
-        entries = bundle.get("entry", []) if isinstance(bundle, dict) else []
+    def parse_bundle(bundle: Any) -> Dict[str, List[Dict[str, Any]]]:
+        """Parse a bundle object while isolating malformed entry records."""
+        if not isinstance(bundle, dict):
+            raise TypeError("bundle must be a dictionary")
+
+        entries = bundle.get("entry", [])
         if not isinstance(entries, list):
-            entries = []
+            raise TypeError("bundle entry must be a list")
 
         patients = []
         observations = []

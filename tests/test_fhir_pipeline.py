@@ -84,6 +84,26 @@ class FHIRParserTests(unittest.TestCase):
         )
         self.assertEqual(parsed["observations"], [])
 
+    def test_parser_rejects_invalid_bundle_containers(self):
+        for bundle in (None, [], (), "not-a-bundle"):
+            with self.subTest(bundle=bundle), self.assertRaisesRegex(
+                TypeError, "bundle must be a dictionary"
+            ):
+                FHIRParser.parse_bundle(bundle)
+
+    def test_parser_rejects_non_list_entry_containers(self):
+        for entries in (None, {}, (), "not-an-entry-list"):
+            with self.subTest(entries=entries), self.assertRaisesRegex(
+                TypeError, "bundle entry must be a list"
+            ):
+                FHIRParser.parse_bundle({"entry": entries})
+
+    def test_parser_accepts_missing_or_empty_entry_lists(self):
+        expected = {"patients": [], "observations": []}
+
+        self.assertEqual(FHIRParser.parse_bundle({}), expected)
+        self.assertEqual(FHIRParser.parse_bundle({"entry": []}), expected)
+
     def test_parser_only_strips_a_leading_patient_reference_prefix(self):
         bundle = {
             "entry": [
