@@ -141,6 +141,7 @@ class PHIMaskerTests(unittest.TestCase):
             {"patient_id": "synthetic-missing"},
             {"patient_id": "synthetic-null", "mrn": None},
             {"patient_id": "synthetic-empty", "mrn": ""},
+            {"patient_id": "synthetic-blank", "mrn": " \t\n"},
         ):
             with self.subTest(patient=patient):
                 original = copy.deepcopy(patient)
@@ -151,6 +152,12 @@ class PHIMaskerTests(unittest.TestCase):
                 self.assertNotIn("mrn", masked)
                 self.assertEqual(masked["pseudonymized_patient_key"], "")
                 self.assertIs(masked["is_mrn_pseudonymized"], False)
+
+    def test_phi_masker_normalizes_identifier_whitespace(self):
+        unpadded = PHIMasker.pseudonymize_mrn("SYNTHETIC_MRN_123", TEST_KEY)
+        padded = PHIMasker.pseudonymize_mrn(" \tSYNTHETIC_MRN_123\n", TEST_KEY)
+
+        self.assertEqual(unpadded, padded)
 
     def test_phi_masker_is_deterministic_per_key_and_separates_keys(self):
         first = PHIMasker.pseudonymize_mrn("SYNTHETIC_MRN_123", TEST_KEY)

@@ -29,15 +29,19 @@ class PHIMasker:
 
     @classmethod
     def pseudonymize_mrn(cls, mrn: str, key: Optional[str] = None) -> str:
-        """Return a deterministic 128-bit HMAC token for a non-empty MRN."""
-        if mrn is None or mrn == "":
+        """Return a deterministic 128-bit HMAC token for a normalized MRN."""
+        if mrn is None:
             return ""
         if not isinstance(mrn, str):
             raise TypeError("mrn must be a string")
 
+        normalized_mrn = mrn.strip()
+        if not normalized_mrn:
+            return ""
+
         digest = hmac.new(
             cls._resolve_key(key),
-            mrn.encode("utf-8"),
+            normalized_mrn.encode("utf-8"),
             hashlib.sha256,
         ).hexdigest()
         return digest[:32]

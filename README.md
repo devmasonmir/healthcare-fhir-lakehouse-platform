@@ -122,8 +122,10 @@ export PHI_PSEUDONYMIZATION_KEY="replace-with-a-secret-of-at-least-32-bytes"
 ```
 
 Patient records with a non-empty MRN receive a pseudonymized key and set
-`is_mrn_pseudonymized` to `true`. Missing, null, or empty MRNs produce an empty
-key and set the status to `false`; they do not require the pseudonymization secret.
+`is_mrn_pseudonymized` to `true`. MRNs are trimmed before hashing so surrounding
+whitespace does not create different tokens. Missing, null, empty, or whitespace-only
+MRNs produce an empty key and set the status to `false`; they do not require the
+pseudonymization secret.
 
 The parser treats missing or empty optional `identifier`, `coding`, `subject`, and
 `valueQuantity` elements as null fields. Non-object entries are skipped so one
