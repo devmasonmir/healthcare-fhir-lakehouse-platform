@@ -124,6 +124,31 @@ class FHIRParserTests(unittest.TestCase):
             "Group/Patient/p2",
         )
 
+    def test_parser_prefers_explicit_loinc_coding(self):
+        bundle = {
+            "entry": [{
+                "resource": {
+                    "resourceType": "Observation",
+                    "id": "synthetic-o-loinc",
+                    "code": {"coding": [
+                        {
+                            "system": "http://snomed.info/sct",
+                            "code": "synthetic-snomed-code",
+                        },
+                        {"system": "http://loinc.org", "code": "8867-4"},
+                    ]},
+                }
+            }]
+        }
+
+        parsed = FHIRParser.parse_bundle(bundle)
+        validation = ClinicalDataContractValidator.validate_observations(
+            parsed["observations"]
+        )
+
+        self.assertEqual(parsed["observations"][0]["code"], "8867-4")
+        self.assertIs(validation["passed"], True)
+
 
 class PHIMaskerTests(unittest.TestCase):
     def test_phi_masker_removes_mrn_without_mutating_source(self):

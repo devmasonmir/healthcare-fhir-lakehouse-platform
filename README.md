@@ -130,9 +130,11 @@ pseudonymization secret.
 The parser treats missing or empty optional `identifier`, `coding`, `subject`, and
 `valueQuantity` elements as null fields. Non-object entries are skipped so one
 malformed resource does not prevent valid resources in the same synthetic bundle
-from being processed. The top-level bundle must be an object and `entry`, when
-present, must be a list; invalid batch containers raise `TypeError` instead of
-being reported as successfully parsed empty bundles.
+from being processed. When an observation contains multiple coding systems, an
+explicit `http://loinc.org` coding is preferred; records without system metadata
+retain the first-coding fallback. The top-level bundle must be an object and
+`entry`, when present, must be a list; invalid batch containers raise `TypeError`
+instead of being reported as successfully parsed empty bundles.
 
 The observation data contract accepts a list of parsed observation objects. It reports
 missing or unsupported LOINC codes and malformed records by input index, while a

@@ -4,6 +4,8 @@ from typing import Any, Dict, List
 
 
 class FHIRParser:
+    LOINC_SYSTEM = "http://loinc.org"
+
     @staticmethod
     def _first_mapping(value: Any) -> Dict[str, Any]:
         """Return the first object from a FHIR repeating element."""
@@ -23,6 +25,29 @@ class FHIRParser:
         if reference.startswith("Patient/"):
             return reference[len("Patient/"):] or None
         return reference
+
+    @staticmethod
+    def _observation_code(code: Any) -> Any:
+        """Prefer an explicit LOINC coding while retaining first-code fallback."""
+        if not isinstance(code, dict):
+            return None
+
+        codings = code.get("coding")
+        if not isinstance(codings, list):
+            return None
+
+        first_coding = FHIRParser._first_mapping(codings)
+        for coding in codings:
+            if not isinstance(coding, dict):
+                continue
+            candidate = coding.get("code")
+            if (
+                coding.get("system") == FHIRParser.LOINC_SYSTEM
+                and isinstance(candidate, str)
+                and candidate
+            ):
+                return candidate
+        return first_coding.get("code")
 
     @staticmethod
     def parse_bundle(bundle: Any) -> Dict[str, List[Dict[str, Any]]]:
@@ -54,18 +79,13 @@ class FHIRParser:
                     "mrn": identifier.get("value"),
                 })
             elif rtype == "Observation":
-                coding = FHIRParser._first_mapping(
-                    resource.get("code", {}).get("coding")
-                    if isinstance(resource.get("code"), dict)
-                    else None
-                )
                 quantity = resource.get("valueQuantity")
                 if not isinstance(quantity, dict):
                     quantity = {}
                 observations.append({
                     "obs_id": resource.get("id"),
                     "patient_id": FHIRParser._reference_id(resource.get("subject")),
-                    "code": coding.get("code"),
+                    "code": FHIRParser._observation_code(resource.get("code")),
                     "value": quantity.get("value"),
                     "unit": quantity.get("unit"),
                 })
